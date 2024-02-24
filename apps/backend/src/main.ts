@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import morgan from 'morgan';
+
 import assetRouter from './routes/asset';
 import authRouter from './routes/auth';
 
