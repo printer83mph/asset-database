@@ -16,6 +16,8 @@
     "drizzle-orm": "^0.29.4",
     "express": "^4.18.2",
     "morgan": "^1.10.0",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -24,6 +26,8 @@
     "@types/express": "^4.17.21",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.11.20",
+    "@types/passport": "^1.0.16",
+    "@types/passport-local": "^1.0.38",
     "drizzle-kit": "^0.20.14",
     "eslint": "^8.57.0",
     "nodemon": "^3.1.0",

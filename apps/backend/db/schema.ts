@@ -3,8 +3,14 @@
 import { relations } from 'drizzle-orm';
 import { primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
+export const USER_SCHOOLS = ['cas', 'seas', 'wharton', 'none'] as const;
+export type UserSchool = (typeof USER_SCHOOLS)[number];
+
 export const user = sqliteTable('user', {
   pennkey: text('pennkey').primaryKey(),
+  hashedPassword: text('hashed_password').notNull(),
+  salt: text('salt').notNull(),
+  school: text('school', { enum: USER_SCHOOLS }).notNull(),
   name: text('name').notNull(),
 });
 
@@ -33,8 +39,8 @@ export const version = sqliteTable(
     author: text('author')
       .references(() => user.pennkey)
       .notNull(),
-    keywords: text('keywords'),
     changes: text('changes').notNull(),
+    keywords: text('keywords'),
   },
   (table) => ({
     pk: primaryKey({
