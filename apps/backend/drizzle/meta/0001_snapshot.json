@@ -1,0 +1,146 @@
+{
+  "version": "5",
+  "dialect": "sqlite",
+  "id": "c86bc156-e0d9-4c65-85e8-021d8febc824",
+  "prevId": "d40abd88-6ec5-4041-880c-3e90f7aa98e0",
+  "tables": {
+    "asset": {
+      "name": "asset",
+      "columns": {
+        "path": {
+          "name": "path",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "user": {
+      "name": "user",
+      "columns": {
+        "pennkey": {
+          "name": "pennkey",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "version": {
+      "name": "version",
+      "columns": {
+        "asset_path": {
+          "name": "asset_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "semver": {
+          "name": "semver",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "author": {
+          "name": "author",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "keywords": {
+          "name": "keywords",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "changes": {
+          "name": "changes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "version_asset_path_asset_path_fk": {
+          "name": "version_asset_path_asset_path_fk",
+          "tableFrom": "version",
+          "tableTo": "asset",
+          "columnsFrom": [
+            "asset_path"
+          ],
+          "columnsTo": [
+            "path"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "version_author_user_pennkey_fk": {
+          "name": "version_author_user_pennkey_fk",
+          "tableFrom": "version",
+          "tableTo": "user",
+          "columnsFrom": [
+            "author"
+          ],
+          "columnsTo": [
+            "pennkey"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "version_asset_path_semver_pk": {
+          "columns": [
+            "asset_path",
+            "semver"
+          ],
+          "name": "version_asset_path_semver_pk"
+        }
+      },
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  }
+}
