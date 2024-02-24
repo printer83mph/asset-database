@@ -1,0 +1,8 @@
+{
+  "name": "asset-database",
+  "version": "0.1.0",
+  "description": "An elegant digital production pipeline asset database",
+  "private": true,
+  "author": "printer83mph",
+  "license": "ISC"
+}
