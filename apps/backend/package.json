@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "db:generate": "drizzle-kit generate:sqlite",
     "db:studio": "drizzle-kit studio",
+    "lint": "eslint . --max-warnings=0 --report-unused-disable-directives \n if [ $? -eq 0 ]; then echo '✅ No ESLint warnings or errors!' \n fi",
     "build": "tsc",
     "start": "node ./dist/src/main.js"
   },

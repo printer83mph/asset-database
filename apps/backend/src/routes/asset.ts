@@ -1,8 +1,9 @@
 import express from 'express';
+import { z } from 'zod';
+
 import { asset, version } from '../../db/schema';
 import db from '../lib/database';
 import { assetInsertSchema, versionInsertSchema } from '../schema/db-models';
-import { z } from 'zod';
 
 const assetRouter = express.Router();
 

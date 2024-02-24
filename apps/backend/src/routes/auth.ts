@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm';
 import express from 'express';
+import crypto from 'node:crypto';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
-import crypto from 'node:crypto';
 
 import { user as userTable } from '../../db/schema';
 import db from '../lib/database';
