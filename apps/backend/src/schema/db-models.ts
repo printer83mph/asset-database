@@ -21,16 +21,15 @@ export const parseVersionSelect = ({
   keywords,
   ...versionSelect
 }: typeof version.$inferSelect) => ({
-  keywords: keywords?.split(',').map((keyword) => keyword.trim()),
+  keywords: keywords?.split(',').map((keyword) => keyword.trim()) ?? [],
   ...versionSelect,
 });
 
-export type Version = Omit<
+// allow optional keywords when working with Version
+export type Version = PartialBy<
   ReturnType<typeof parseVersionSelect>,
   'keywords'
-> & {
-  keywords?: string[];
-};
+>;
 
 export const versionInsertSchema = z.object({
   assetPath: z.string(),
@@ -40,7 +39,7 @@ export const versionInsertSchema = z.object({
   author: z.string().min(1, 'Cannot be empty'),
   keywords: z
     .array(z.string())
-    .optional()
+    .or(z.undefined())
     .transform((keywords) =>
       keywords?.map((keyword) => keyword.trim()).join(','),
     ),
