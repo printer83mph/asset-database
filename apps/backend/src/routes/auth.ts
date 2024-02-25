@@ -3,8 +3,8 @@ import express from 'express';
 import crypto from 'node:crypto';
 import passport from 'passport';
 import { Strategy as JsonStrategy } from 'passport-json';
-
 import { z } from 'zod';
+
 import { USER_SCHOOLS, UserSchool, user as userTable } from '../../db/schema';
 import CustomError from '../lib/custom-error';
 import db from '../lib/database';

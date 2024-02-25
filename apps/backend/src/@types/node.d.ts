@@ -13,8 +13,8 @@ declare module 'passport-json' {
 }
 
 declare module 'better-sqlite3-session-store' {
-  import type session from 'express-session';
   import type BetterSQLite3 from 'better-sqlite3';
+  import type session from 'express-session';
 
   export default function (sess: session): {
     new (opts: {
