@@ -3,5 +3,7 @@ dist
 
 *.db
 
+.env.local
+
 .vscode/*
 !.vscode/extensions.json
