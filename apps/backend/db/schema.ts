@@ -15,7 +15,6 @@ export const user = sqliteTable('user', {
 });
 
 export const userRelations = relations(user, ({ many }) => ({
-  asset: many(asset),
   version: many(version),
 }));
 

@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { asset, version } from '../../db/schema';
 import db from '../lib/database';
+import { withZod } from '../lib/util';
 import { assetInsertSchema, versionInsertSchema } from '../schema/db-models';
 
 const assetRouter = express.Router();
@@ -15,49 +16,35 @@ const assetNewPOSTSchema = z.intersection(
 );
 export type AssetNewPOSTRequest = z.infer<typeof assetNewPOSTSchema>;
 
-assetRouter.post('/new', async (req, res) => {
-  const result = await assetNewPOSTSchema.safeParseAsync(req.body);
-  if (!result.success)
-    return res
-      .status(400)
-      .send(
-        `Invalid asset POST body.<br><br>${result.error.issues
-          .map(
-            ({ path, message }) =>
-              `<code>${path.join('.')}</code>: ${message}.`,
-          )
-          .join('<br>')}`,
-      );
+assetRouter.post(
+  '/new',
+  withZod(assetNewPOSTSchema, async (data, _req, res, next) => {
+    try {
+      {
+        // upload asset itself
+        const response = await db
+          .insert(asset)
+          .values(data)
+          .onConflictDoNothing();
+        if (response.changes === 0)
+          return res
+            .status(400)
+            .send(`The provided path "${data.path}" was taken!`);
+      }
 
-  try {
-    {
-      // upload asset itself
-      const response = await db
-        .insert(asset)
-        .values(result.data)
-        .onConflictDoNothing();
-      if (response.changes === 0)
-        return res
-          .status(400)
-          .send(`The provided path "${result.data.path}" was taken!`);
+      // upload initial version
+      const { initialVersion, path: assetPath } = data;
+      if (initialVersion) {
+        await db.insert(version).values({ assetPath, ...initialVersion });
+
+        return res.send('Successfully created asset with initial version!');
+      }
+
+      res.send('Successfully created empty asset!');
+    } catch (err) {
+      return next(err);
     }
-
-    // upload initial version
-    const { initialVersion, path: assetPath } = result.data;
-    if (initialVersion) {
-      await db.insert(version).values({ assetPath, ...initialVersion });
-
-      return res.send('Successfully created asset with initial version!');
-    }
-
-    res.send('Successfully created empty asset!');
-  } catch (err) {
-    res
-      .status(500)
-      .send(
-        `Something went wrong: ${err instanceof Error ? err.message : `we have no idea`}`,
-      );
-  }
-});
+  }),
+);
 
 export default assetRouter;
