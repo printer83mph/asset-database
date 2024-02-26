@@ -4,10 +4,12 @@ import crypto from 'node:crypto';
 import { promisify } from 'node:util';
 import { z } from 'zod';
 
-import { USER_SCHOOLS, UserSchool, user as userTable } from '../../db/schema';
+import { user as userTable } from '../../db/schema';
 import db from '../lib/database';
 import { pick } from '../lib/util';
 import { authedProcedure, publicProcedure, router } from '../trpc';
+import { UserSchool } from 'validation/src/semantics';
+import { userSchema } from 'validation/src/db-models';
 
 const pbkdf2 = promisify(crypto.pbkdf2);
 
@@ -87,18 +89,7 @@ const authRouter = router({
     }),
   signup: publicProcedure
     .meta({ openapi: { method: 'POST', path: '/auth/signup' } })
-    .input(
-      z.object({
-        pennkey: z.string().min(1, 'Cannot be empty').trim(),
-        password: z.string().min(8, 'Must be at least 8 characters'),
-        name: z
-          .string()
-          .min(1, 'Cannot be empty')
-          .regex(/^[A-Za-z ]+$/)
-          .trim(),
-        school: z.enum(USER_SCHOOLS),
-      }),
-    )
+    .input(userSchema)
     .mutation(async ({ input }) => {
       // salt and hash password
       const salt = crypto.randomBytes(16);

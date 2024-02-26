@@ -1,17 +1,14 @@
 import { useState } from 'react';
 import { trpc } from './utils/trpc';
-import LoginPage from './routes/login';
-import SignupPage from './routes/signup';
-import Me from './routes/me';
+import { RouterProvider } from 'react-router-dom';
+import router from './router';
 
 function App() {
   const [client] = useState(() => trpc.createClient());
 
   return (
     <trpc.Provider client={client}>
-      <LoginPage />
-      <SignupPage />
-      <Me />
+      <RouterProvider router={router} />
     </trpc.Provider>
   );
 }
