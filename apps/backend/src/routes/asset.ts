@@ -79,11 +79,15 @@ const assetRouter = router({
 
       return {
         asset: rows[0].asset,
-        versions: rows
-          .map(({ version }) => version)
-          .filter(
-            (version) => version !== null,
-          ) as (typeof version.$inferSelect)[],
+        versions: (
+          rows
+            .map(({ version }) => version)
+            .filter(
+              (version) => version !== null,
+            ) as (typeof version.$inferSelect)[]
+        )
+          // clear asset path (it's redundant)
+          .map((version) => ({ ...version, assetPath: undefined })),
       };
     }),
 });

@@ -1,4 +1,4 @@
-import { Box, Button } from '@chakra-ui/react';
+import { Box, Button, Input } from '@chakra-ui/react';
 import { useState } from 'react';
 
 import { trpc } from '../../utils/trpc';
@@ -27,7 +27,7 @@ export default function AssetsPage() {
       </Button>
 
       <Box mt={20}>
-        <input
+        <Input
           type="text"
           value={assetPath}
           onChange={(evt) => setAssetPath(evt.target.value)}
