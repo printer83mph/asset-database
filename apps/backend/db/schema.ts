@@ -2,9 +2,7 @@
 
 import { relations } from 'drizzle-orm';
 import { primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-
-export const USER_SCHOOLS = ['cas', 'seas', 'wharton', 'none'] as const;
-export type UserSchool = (typeof USER_SCHOOLS)[number];
+import { USER_SCHOOLS } from 'validation/src/semantics';
 
 export const user = sqliteTable('user', {
   pennkey: text('pennkey').primaryKey(),

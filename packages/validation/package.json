@@ -1,0 +1,13 @@
+{
+  "name": "validation",
+  "version": "0.1.0",
+  "files": [
+    "src"
+  ],
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  }
+}

@@ -1,11 +1,11 @@
 import { TRPCError } from '@trpc/server';
 import { eq } from 'drizzle-orm';
+import { assetSchema, versionSchema } from 'validation/src/db-models';
+import { pathSchema } from 'validation/src/semantics';
 import { z } from 'zod';
 
 import { asset, version } from '../../db/schema';
 import db from '../lib/database';
-import { assetInsertSchema, versionInsertSchema } from '../schema/db-models';
-import { pathSchema } from '../schema/semantics';
 import { authedProcedure, router } from '../trpc';
 
 const assetRouter = router({
@@ -13,8 +13,8 @@ const assetRouter = router({
     .meta({ openapi: { method: 'POST', path: '/asset/new' } })
     .input(
       z.object({
-        asset: assetInsertSchema,
-        initialVersion: versionInsertSchema
+        asset: assetSchema,
+        initialVersion: versionSchema
           .omit({ assetPath: true, author: true })
           .optional(),
       }),

@@ -10,13 +10,21 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.8.2",
+    "@emotion/react": "^11.11.3",
+    "@emotion/styled": "^11.11.0",
+    "@hookform/resolvers": "^3.3.4",
     "@trpc-swr/client": "^2.0.1",
     "@trpc/client": "^10.45.1",
     "backend": "workspace:*",
+    "framer-motion": "^11.0.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.50.1",
-    "swr": "^2.2.5"
+    "react-router-dom": "^6.22.1",
+    "swr": "^2.2.5",
+    "validation": "workspace:*",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.56",

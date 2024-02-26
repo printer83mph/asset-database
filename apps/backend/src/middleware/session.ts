@@ -2,8 +2,8 @@ import bsqlite3store from 'better-sqlite3-session-store';
 import type { Express } from 'express';
 import session, { Session } from 'express-session';
 
-import { UserSchool } from '../../db/schema';
 import { sqlite } from '../lib/database';
+import { UserSchool } from 'validation/src/semantics';
 
 // extend session object with user field
 declare module 'express' {
