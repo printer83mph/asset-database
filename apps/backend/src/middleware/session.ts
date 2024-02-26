@@ -1,8 +1,21 @@
 import bsqlite3store from 'better-sqlite3-session-store';
 import type { Express } from 'express';
-import session from 'express-session';
+import session, { Session } from 'express-session';
 
+import { UserSchool } from '../../db/schema';
 import { sqlite } from '../lib/database';
+
+// extend session object with user field
+declare module 'express' {
+  export interface Request {
+    session: Session & {
+      user?: {
+        pennkey: string;
+        school: UserSchool;
+      };
+    };
+  }
+}
 
 const SQLiteStore = bsqlite3store(session);
 

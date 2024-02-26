@@ -1,14 +1,15 @@
+import { TRPCError } from '@trpc/server';
 import { eq } from 'drizzle-orm';
-import express from 'express';
 import crypto from 'node:crypto';
-import passport from 'passport';
-import { Strategy as JsonStrategy } from 'passport-json';
+import { promisify } from 'node:util';
 import { z } from 'zod';
 
 import { USER_SCHOOLS, UserSchool, user as userTable } from '../../db/schema';
-import CustomError from '../lib/custom-error';
 import db from '../lib/database';
-import { pick, withZod } from '../lib/util';
+import { pick } from '../lib/util';
+import { authedProcedure, publicProcedure, router } from '../trpc';
+
+const pbkdf2 = promisify(crypto.pbkdf2);
 
 // augment express.User with info
 declare global {
@@ -21,150 +22,117 @@ declare global {
   }
 }
 
-// serialization/deserialization
-passport.serializeUser((user, cb) => {
-  process.nextTick(() => {
-    cb(
-      null,
-      pick(user as RetrievedUser, ['pennkey', 'school']) satisfies Express.User,
-    );
-  });
-});
+// actual router
+const authRouter = router({
+  me: authedProcedure
+    .meta({ openapi: { method: 'GET', path: '/auth' } })
+    .query(({ ctx }) => {
+      return ctx.user;
+    }),
+  login: publicProcedure
+    .meta({ openapi: { method: 'POST', path: '/auth/login' } })
+    .input(z.object({ pennkey: z.string(), password: z.string() }))
+    .mutation(async ({ ctx, input: { pennkey, password } }) => {
+      // find user in DB
+      const users = await db
+        .select()
+        .from(userTable)
+        .where(eq(userTable.pennkey, pennkey));
 
-passport.deserializeUser((user: Express.User, cb) => {
-  process.nextTick(() => {
-    return cb(null, user);
-  });
-});
+      if (users.length === 0)
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Incorrect pennkey or password',
+        });
 
-type RetrievedUser = typeof userTable.$inferSelect;
+      const [user] = users;
 
-// passport json strategy
-passport.use(
-  new JsonStrategy(
-    { usernameProp: 'pennkey' },
-    async (pennkey, password, callback) => {
+      // salt and hash input password
+      let hashedPassword: Buffer;
       try {
-        // find user in DB
-        const users = await db
-          .select()
-          .from(userTable)
-          .where(eq(userTable.pennkey, pennkey));
-        if (users.length === 0)
-          return callback(null, false, {
-            message: 'Incorrect pennkey or password',
-          });
-
-        const [user] = users;
-
-        // salt and hash
-        crypto.pbkdf2(
+        hashedPassword = await pbkdf2(
           password,
           Buffer.from(user.salt, 'base64'),
           310000,
           32,
           'sha256',
-          (err, hashedPassword) => {
-            if (err) return callback(err);
-
-            if (
-              !crypto.timingSafeEqual(
-                Buffer.from(user.hashedPassword, 'base64'),
-                hashedPassword,
-              )
-            ) {
-              return callback(null, false, {
-                message: 'Incorrect pennkey or password',
-              });
-            }
-
-            return callback(null, user satisfies RetrievedUser);
-          },
         );
       } catch (err) {
-        return callback(err);
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
       }
-    },
-  ),
-);
 
-// actual router
-const authRouter = express.Router();
+      // see if hashed passwords match
+      if (
+        !crypto.timingSafeEqual(
+          Buffer.from(user.hashedPassword, 'base64'),
+          hashedPassword,
+        )
+      )
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Incorrect pennkey or password',
+        });
 
-authRouter.get('/', (req, res, next) => {
-  if (!req.user) return next(new CustomError(401, 'Not logged in'));
-  res.json(req.user);
-});
+      // update session
+      const userSessionInfo = pick(user, ['pennkey', 'school']);
+      ctx.express.req.session.user = userSessionInfo;
 
-// authRouter.post('/login', passport.authenticate('json'));
-
-authRouter.post('/login', (req, res, next) => {
-  passport.authenticate(
-    'json',
-    (err: unknown, user: Express.User, info: string, status: number = 500) => {
-      if (err)
-        return next(new CustomError(status, info ?? 'Something went wrong'));
-
-      if (!user) return next(new CustomError(400, 'Could not log in'));
-      res.send(`Successfully logged in as ${user.pennkey}`);
-    },
-  )(req, res, next);
-});
-
-authRouter.post('/logout', (req, res, next) => {
-  req.logout((err) => {
-    if (err) return next(err);
-    res.send('Successfully logged out!');
-  });
-});
-
-const signupSchema = z.object({
-  pennkey: z.string().min(1, 'Cannot be empty').trim(),
-  password: z.string().min(8, 'Must be at least 8 characters'),
-  name: z
-    .string()
-    .min(1, 'Cannot be empty')
-    .regex(/^[A-Za-z ]+$/)
-    .trim(),
-  school: z.enum(USER_SCHOOLS),
-});
-
-authRouter.post(
-  '/signup',
-  withZod(
-    signupSchema,
-    async ({ pennkey, password, name, school }, _req, res, next) => {
+      return userSessionInfo;
+    }),
+  logout: authedProcedure
+    .meta({ openapi: { method: 'POST', path: '/auth/logout' } })
+    .mutation(({ ctx }) => {
+      const { session } = ctx.express.req;
+      session.user = undefined;
+    }),
+  signup: publicProcedure
+    .meta({ openapi: { method: 'POST', path: '/auth/signup' } })
+    .input(
+      z.object({
+        pennkey: z.string().min(1, 'Cannot be empty').trim(),
+        password: z.string().min(8, 'Must be at least 8 characters'),
+        name: z
+          .string()
+          .min(1, 'Cannot be empty')
+          .regex(/^[A-Za-z ]+$/)
+          .trim(),
+        school: z.enum(USER_SCHOOLS),
+      }),
+    )
+    .mutation(async ({ input }) => {
       // salt and hash password
       const salt = crypto.randomBytes(16);
-      crypto.pbkdf2(
-        password,
-        salt,
-        310000,
-        32,
-        'sha256',
-        async (err, hashedPassword) => {
-          if (err) return next(err);
+      let hashedPassword: Buffer;
+      try {
+        hashedPassword = await pbkdf2(
+          input.password,
+          salt,
+          310000,
+          32,
+          'sha256',
+        );
+      } catch (err) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+      }
 
-          const result = await db
-            .insert(userTable)
-            .values({
-              pennkey,
-              name,
-              school,
-              hashedPassword: hashedPassword.toString('base64'),
-              salt: salt.toString('base64'),
-            })
-            .onConflictDoNothing();
-          if (result.changes === 0)
-            return next(
-              new CustomError(400, 'The provided pennkey is already taken'),
-            );
+      // add user to DB
+      const result = await db
+        .insert(userTable)
+        .values({
+          ...input,
+          hashedPassword: hashedPassword.toString('base64'),
+          salt: salt.toString('base64'),
+        })
+        .onConflictDoNothing();
+      if (result.changes === 0)
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'The provided pennkey is already taken',
+        });
 
-          res.send(`Successfully created user with pennkey ${pennkey}!`);
-        },
-      );
-    },
-  ),
-);
+      const { pennkey, school } = input;
+      return { pennkey, school };
+    }),
+});
 
 export default authRouter;

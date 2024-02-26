@@ -1,7 +1,7 @@
 import { ZodTypeDef, z } from 'zod';
 
 import { asset, version } from '../../db/schema';
-import { pathSchema } from './semantics';
+import { pathSchema, semverSchema } from './semantics';
 
 // --------- ---------  ASSETS --------- ---------
 
@@ -34,9 +34,7 @@ export type Version = PartialBy<
 
 export const versionInsertSchema = z.object({
   assetPath: z.string(),
-  semver: z
-    .string()
-    .regex(/^[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}$/, 'Must use shape x.x.x'),
+  semver: semverSchema,
   author: z.string().min(1, 'Cannot be empty'),
   keywords: z
     .array(z.string())
