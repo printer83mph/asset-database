@@ -1,0 +1,9 @@
+node_modules
+dist
+
+*.db
+
+tsconfig.json
+
+.vscode/*
+!.vscode/extensions.json
