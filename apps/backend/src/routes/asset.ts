@@ -20,68 +20,71 @@ const assetRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      let result;
       try {
         // upload asset itself
-        const result = await db
+        result = await db
           .insert(asset)
           .values(input.asset)
           .onConflictDoNothing();
-        if (result.changes === 0)
-          throw new TRPCError({
-            message: `The provided path "${input.asset.path}" was taken!`,
-            code: 'BAD_REQUEST',
-          });
-
-        const {
-          initialVersion,
-          asset: { path: assetPath },
-        } = input;
-
-        // upload initial version
-        if (initialVersion) {
-          await db
-            .insert(version)
-            .values({ assetPath, author: ctx.user.pennkey, ...initialVersion });
-
-          // return success with path and version
-          return { path: assetPath, semver: initialVersion.semver };
-        }
-
-        // return success with just path
-        return { path: assetPath };
       } catch (err) {
         // uh oh internal error
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
       }
+
+      if (result.changes === 0)
+        throw new TRPCError({
+          message: `The provided path "${input.asset.path}" was taken!`,
+          code: 'BAD_REQUEST',
+        });
+
+      const {
+        initialVersion,
+        asset: { path: assetPath },
+      } = input;
+
+      // upload initial version
+      if (initialVersion) {
+        await db
+          .insert(version)
+          .values({ assetPath, author: ctx.user.pennkey, ...initialVersion });
+
+        // return success with path and version
+        return { path: assetPath, semver: initialVersion.semver };
+      }
+
+      // return success with just path
+      return { path: assetPath };
     }),
   get: authedProcedure
     .meta({ openapi: { method: 'GET', path: '/asset/{path}' } })
     .input(z.object({ path: pathSchema }))
     .query(async ({ ctx, input: { path } }) => {
+      let rows;
       try {
-        const rows = await ctx.db
-          .selectDistinct()
+        rows = await ctx.db
+          .select()
           .from(asset)
           .leftJoin(version, eq(version.assetPath, path))
           .where(eq(asset.path, path));
-
-        if (rows.length === 0)
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: `Could not find an asset matching path ${path}`,
-          });
-
-        return {
-          asset: rows[0].asset,
-          versions: rows
-            .map(({ version }) => version)
-            .filter(
-              (version) => version !== null,
-            ) as (typeof version.$inferSelect)[],
-        };
       } catch (err) {
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
       }
+
+      if (rows === null || rows.length === 0)
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: `Could not find an asset matching path ${path}`,
+        });
+
+      return {
+        asset: rows[0].asset,
+        versions: rows
+          .map(({ version }) => version)
+          .filter(
+            (version) => version !== null,
+          ) as (typeof version.$inferSelect)[],
+      };
     }),
 });
 
