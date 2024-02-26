@@ -5,7 +5,7 @@ import type { AppRouter } from 'backend/src/router';
 export const trpc = createSWRProxyHooks<AppRouter>({
   links: [
     httpBatchLink({
-      url: 'https://localhost:8000/api/trpc',
+      url: `/api/trpc`,
     }),
   ],
 });
