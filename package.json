@@ -4,5 +4,13 @@
   "description": "An elegant digital production pipeline asset database",
   "private": true,
   "author": "printer83mph",
-  "license": "ISC"
+  "license": "ISC",
+  "scripts": {
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "build": "turbo dev"
+  },
+  "dependencies": {
+    "turbo": "^1.12.4"
+  }
 }

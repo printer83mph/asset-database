@@ -20,7 +20,6 @@ export const userSchema = z.object({
 
 export const assetSchema = z.object({
   path: pathSchema,
-  semver: semverSchema,
   displayName: z
     .string()
     .min(

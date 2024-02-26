@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { trpc } from './utils/trpc';
 import { RouterProvider } from 'react-router-dom';
+
 import router from './router';
+import { trpc } from './utils/trpc';
 
 function App() {
   const [client] = useState(() => trpc.createClient());

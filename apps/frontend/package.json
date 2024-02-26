@@ -27,6 +27,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@cis-1962/eslint-config": "^1.0.9",
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
