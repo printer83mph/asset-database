@@ -3,21 +3,24 @@ import {
   Card,
   CardBody,
   CardHeader,
-  Container,
-  Heading,
-  Stack,
   Center,
+  Container,
+  FormControl,
+  FormLabel,
+  Heading,
   Link,
+  Select,
+  Stack,
 } from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import z from 'zod';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
-
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { userSchema } from 'validation/src/db-models';
-import ControlledTextInput from '../../components/text-input';
-import { trpc } from '../../utils/trpc';
 import { UserSchool } from 'validation/src/semantics';
+import z from 'zod';
+
+import ControlledTextInput from '../../components/form/controlled-text-input';
+import { trpc } from '../../utils/trpc';
 
 const signupSchema = userSchema;
 type FormValues = z.infer<typeof signupSchema>;
@@ -32,6 +35,7 @@ export default function SignupPage() {
   const navigate = useNavigate();
 
   const {
+    register,
     control,
     handleSubmit,
     formState: { isSubmitting },
@@ -74,6 +78,22 @@ export default function SignupPage() {
               placeholder="Jane Doe"
               label="Name"
             />
+            <FormControl>
+              <FormLabel
+                htmlFor="school-select"
+                textColor="gray"
+                fontSize="small"
+                mb={1}
+              >
+                School
+              </FormLabel>
+              <Select id="school-select" {...register('school')}>
+                <option value="none">None</option>
+                <option value="cas">CAS</option>
+                <option value="seas">SEAS</option>
+                <option value="wharton">Wharton</option>
+              </Select>
+            </FormControl>
           </Stack>
           <Button
             type="submit"

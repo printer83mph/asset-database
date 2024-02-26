@@ -3,19 +3,19 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Center,
   Container,
   Heading,
-  Stack,
-  Center,
   Link,
+  Stack,
 } from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import z from 'zod';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
-
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { userSchema } from 'validation/src/db-models';
-import ControlledTextInput from '../../components/text-input';
+import z from 'zod';
+
+import ControlledTextInput from '../../components/form/controlled-text-input';
 import { trpc } from '../../utils/trpc';
 
 const signupSchema = userSchema;
@@ -74,7 +74,7 @@ export default function LoginPage() {
           </Button>
           <Center mt={4}>
             <Link as={RouterLink} to={'/auth/signup'} textDecor="underline">
-              Don't have an account? Sign up here.
+              Don&apos;t have an account? Sign up here.
             </Link>
           </Center>
         </CardBody>
