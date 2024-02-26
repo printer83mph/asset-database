@@ -15,8 +15,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { userSchema } from 'validation/src/db-models';
-import { UserSchool } from 'validation/src/semantics';
+import { UserSchool, userSchema } from 'validation/src/main';
 import z from 'zod';
 
 import ControlledTextInput from '../../components/form/controlled-text-input';

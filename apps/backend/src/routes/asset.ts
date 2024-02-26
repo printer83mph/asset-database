@@ -1,7 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { eq } from 'drizzle-orm';
-import { assetSchema, versionSchema } from 'validation/src/db-models';
-import { pathSchema } from 'validation/src/semantics';
+import { assetSchema, pathSchema, versionSchema } from 'validation';
 import { z } from 'zod';
 
 import { asset, version } from '../../db/schema';

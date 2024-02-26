@@ -1,9 +1,9 @@
 import { createBrowserRouter } from 'react-router-dom';
 
+import AssetsPage from './routes/assets/assets';
 import LoginPage from './routes/auth/login';
 import SignupPage from './routes/auth/signup';
 import Root from './routes/root';
-import AssetsPage from './routes/assets/assets';
 
 const router = createBrowserRouter([
   {
