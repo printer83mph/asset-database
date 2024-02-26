@@ -18,7 +18,7 @@ import z from 'zod';
 import ControlledTextInput from '../../components/form/controlled-text-input';
 import { trpc } from '../../utils/trpc';
 
-const signupSchema = userSchema;
+const signupSchema = userSchema.pick({ pennkey: true, password: true });
 type FormValues = z.infer<typeof signupSchema>;
 
 export default function LoginPage() {
@@ -32,7 +32,7 @@ export default function LoginPage() {
     formState: { isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { pennkey: '', password: '', name: '', school: 'seas' },
+    defaultValues: { pennkey: '', password: '' },
   });
 
   const onSubmit: SubmitHandler<FormValues> = async ({ pennkey, password }) => {
