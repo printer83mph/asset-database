@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "build": "turbo dev"
+    "build": "turbo build"
   },
   "dependencies": {
     "turbo": "^1.12.4"

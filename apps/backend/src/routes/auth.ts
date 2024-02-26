@@ -2,14 +2,13 @@ import { TRPCError } from '@trpc/server';
 import { eq } from 'drizzle-orm';
 import crypto from 'node:crypto';
 import { promisify } from 'node:util';
+import { UserSchool, userSchema } from 'validation';
 import { z } from 'zod';
 
 import { user as userTable } from '../../db/schema';
 import db from '../lib/database';
 import { pick } from '../lib/util';
 import { authedProcedure, publicProcedure, router } from '../trpc';
-import { UserSchool } from 'validation/src/semantics';
-import { userSchema } from 'validation/src/db-models';
 
 const pbkdf2 = promisify(crypto.pbkdf2);
 
