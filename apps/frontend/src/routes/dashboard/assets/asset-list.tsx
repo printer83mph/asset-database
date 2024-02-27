@@ -5,8 +5,6 @@ import { HiArrowRight } from 'react-icons/hi2';
 export default function AssetList() {
   const { data, error, isLoading } = trpc.asset.list.useSWR();
 
-  console.log(data);
-
   if (error) {
     // TODO
     return null;
