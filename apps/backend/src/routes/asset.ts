@@ -48,11 +48,22 @@ const assetRouter = router({
 
       // upload initial version
       if (initialVersion) {
-        // TODO: upload to S3
+        // TODO: upload to S3 (also refactor this stuff)
         // for now we just save to disk in base64 format
-        const fileBuffer = Buffer.from(initialVersion.fileContents, 'base64');
+
+        // to extract extension and whatnot
+        // const regex = /^data:.+\/(.+);base64,(.*)$/;
+        // const matches = initialVersion.fileContents.match(regex)!;
+        // const ext = matches[1]
+        // const fileData = matches[2];
+        // TODO: also save file extension LOL
+
         const fileId = crypto.randomUUID();
-        await writeFile(path.join(tmpdir(), `${fileId}.asset`), fileBuffer);
+        await writeFile(
+          path.join(tmpdir(), `${fileId}.asset`),
+          initialVersion.fileContents,
+          { encoding: 'ascii' },
+        );
 
         await ctx.db.insert(version).values({
           assetPath,

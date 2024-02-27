@@ -21,7 +21,7 @@ export default function SignupPage() {
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
   } = useForm<FormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: { pennkey: '', password: '' },
@@ -58,17 +58,20 @@ export default function SignupPage() {
         <div className="space-y-6 mt-8">
           <TextInput
             {...register('pennkey')}
+            errorMessage={errors.pennkey?.message}
             placeholder="janedoe"
             label="PennKey"
           />
           <TextInput
             {...register('password')}
+            errorMessage={errors.password?.message}
             type="password"
             placeholder="••••••••"
             label="Password"
           />
           <TextInput
             {...register('name')}
+            errorMessage={errors.name?.message}
             placeholder="Jane Doe"
             label="Name"
           />

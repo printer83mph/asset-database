@@ -36,7 +36,7 @@ const versionRouter = router({
       // TODO: use S3 or something
       const fileContents = await readFile(
         path.join(os.tmpdir(), `${reference}.asset`),
-        { encoding: 'base64' },
+        { encoding: 'ascii' },
       );
 
       return { fileContents };
