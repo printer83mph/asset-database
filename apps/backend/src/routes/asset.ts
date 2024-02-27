@@ -4,7 +4,6 @@ import { assetSchema, pathSchema, versionSchema } from 'validation';
 import { z } from 'zod';
 
 import { asset, version } from '../../db/schema';
-import db from '../lib/database';
 import { authedProcedure, router } from '../trpc';
 
 const assetRouter = router({
@@ -22,7 +21,7 @@ const assetRouter = router({
       let result;
       try {
         // upload asset itself
-        result = await db
+        result = await ctx.db
           .insert(asset)
           .values(input.asset)
           .onConflictDoNothing();
@@ -44,7 +43,7 @@ const assetRouter = router({
 
       // upload initial version
       if (initialVersion) {
-        await db
+        await ctx.db
           .insert(version)
           .values({ assetPath, author: ctx.user.pennkey, ...initialVersion });
 
@@ -89,6 +88,13 @@ const assetRouter = router({
           .map((version) => ({ ...version, assetPath: undefined })),
       };
     }),
+  list: authedProcedure.query(async ({ ctx }) => {
+    const rows = await ctx.db.select().from(asset);
+    return rows.map(({ keywords, ...asset }) => ({
+      ...asset,
+      keywords: keywords?.split(','),
+    }));
+  }),
 });
 
 export default assetRouter;

@@ -1,7 +1,8 @@
 CREATE TABLE `asset` (
 	`path` text PRIMARY KEY NOT NULL,
 	`display_name` text NOT NULL,
-	`description` text
+	`description` text,
+	`keywords` text
 );
 --> statement-breakpoint
 CREATE TABLE `user` (
@@ -17,7 +18,6 @@ CREATE TABLE `version` (
 	`semver` text NOT NULL,
 	`author` text NOT NULL,
 	`changes` text NOT NULL,
-	`keywords` text,
 	PRIMARY KEY(`asset_path`, `semver`),
 	FOREIGN KEY (`asset_path`) REFERENCES `asset`(`path`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`author`) REFERENCES `user`(`pennkey`) ON UPDATE no action ON DELETE no action

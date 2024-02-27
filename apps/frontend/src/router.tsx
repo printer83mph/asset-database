@@ -1,18 +1,22 @@
 import { createBrowserRouter } from 'react-router-dom';
 
-import AssetsPage from './routes/assets/assets';
+import AssetsPage from './routes/dashboard/assets/page';
+import NewAssetPage from './routes/dashboard/assets/new/page';
+import DashboardLayout from './routes/dashboard/layout';
+import DashboardPage from './routes/dashboard/page';
+import RootLayout from './routes/root';
 import LoginPage from './routes/auth/login';
 import SignupPage from './routes/auth/signup';
-import Root from './routes/root';
+import HomePage from './routes/page';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Root />,
+    element: <RootLayout />,
     children: [
       {
         path: '',
-        element: <>Home page (awesome)</>,
+        element: <HomePage />,
       },
       {
         path: 'auth',
@@ -22,8 +26,18 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: 'assets',
-        children: [{ path: '', element: <AssetsPage /> }],
+        path: 'dashboard',
+        element: <DashboardLayout />,
+        children: [
+          { path: '', element: <DashboardPage /> },
+          {
+            path: 'assets',
+            children: [
+              { path: '', element: <AssetsPage /> },
+              { path: 'new', element: <NewAssetPage /> },
+            ],
+          },
+        ],
       },
     ],
   },

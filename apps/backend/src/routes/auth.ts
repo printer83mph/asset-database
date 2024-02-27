@@ -6,7 +6,6 @@ import { UserSchool, userSchema } from 'validation';
 import { z } from 'zod';
 
 import { user as userTable } from '../../db/schema';
-import db from '../lib/database';
 import { pick } from '../lib/util';
 import { authedProcedure, publicProcedure, router } from '../trpc';
 
@@ -27,6 +26,7 @@ declare global {
 const authRouter = router({
   me: authedProcedure
     .meta({ openapi: { method: 'GET', path: '/auth' } })
+    .output(z.any() as z.ZodSchema<Express.User>)
     .query(({ ctx }) => {
       return ctx.user;
     }),
@@ -35,7 +35,7 @@ const authRouter = router({
     .input(z.object({ pennkey: z.string(), password: z.string() }))
     .mutation(async ({ ctx, input: { pennkey, password } }) => {
       // find user in DB
-      const users = await db
+      const users = await ctx.db
         .select()
         .from(userTable)
         .where(eq(userTable.pennkey, pennkey));
@@ -89,7 +89,7 @@ const authRouter = router({
   signup: publicProcedure
     .meta({ openapi: { method: 'POST', path: '/auth/signup' } })
     .input(userSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       // salt and hash password
       const salt = crypto.randomBytes(16);
       let hashedPassword: Buffer;
@@ -106,7 +106,7 @@ const authRouter = router({
       }
 
       // add user to DB
-      const result = await db
+      const result = await ctx.db
         .insert(userTable)
         .values({
           ...input,

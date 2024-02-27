@@ -1,84 +1,73 @@
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Center,
-  Container,
-  Heading,
-  Link,
-  Stack,
-} from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { userSchema } from 'validation/src/main';
+import { Link, useNavigate } from 'react-router-dom';
 import z from 'zod';
 
-import ControlledTextInput from '../../components/form/controlled-text-input';
+import toast from 'react-hot-toast';
+import TextInput from '../../components/input/text-input';
 import { trpc } from '../../utils/trpc';
 
-const signupSchema = userSchema.pick({ pennkey: true, password: true });
-type FormValues = z.infer<typeof signupSchema>;
+const loginSchema = z.object({
+  pennkey: z.string().min(1, 'Please provide a pennkey'),
+  password: z.string().min(1, 'Please provide a password'),
+});
+type FormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const { trigger: login } = trpc.auth.login.useSWRMutation();
+  const { trigger: triggerLogin } = trpc.auth.login.useSWRMutation();
   const { mutate: mutateMe } = trpc.auth.me.useSWR();
   const navigate = useNavigate();
 
   const {
-    control,
+    register,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
   } = useForm<FormValues>({
-    resolver: zodResolver(signupSchema),
+    resolver: zodResolver(loginSchema),
     defaultValues: { pennkey: '', password: '' },
   });
 
-  const onSubmit: SubmitHandler<FormValues> = async ({ pennkey, password }) => {
-    await login({ pennkey, password });
-    await mutateMe();
-    navigate('/');
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    triggerLogin(data, {
+      async onSuccess() {
+        await mutateMe();
+        navigate('/dashboard');
+      },
+      onError(err) {
+        if (err.data?.httpStatus === 400) toast.error(`${err.message}.`);
+        else toast.error('An unknown error occurred.');
+      },
+    });
   };
 
   return (
-    <Container mt={40}>
-      <Card>
-        <CardHeader>
-          <Heading>Log In</Heading>
-        </CardHeader>
-        <CardBody as="form" onSubmit={handleSubmit(onSubmit)} pt={0}>
-          <Stack gap={4}>
-            <ControlledTextInput
-              control={control}
-              path="pennkey"
-              placeholder="janedoe"
-              label="PennKey"
-            />
-            <ControlledTextInput
-              control={control}
-              path="password"
-              type="password"
-              placeholder="••••••••"
-              label="Password"
-            />
-          </Stack>
-          <Button
-            type="submit"
-            colorScheme="blue"
-            isLoading={isSubmitting}
-            mt={8}
-            width={'full'}
-          >
-            Submit
-          </Button>
-          <Center mt={4}>
-            <Link as={RouterLink} to={'/auth/signup'} textDecor="underline">
-              Don&apos;t have an account? Sign up here.
-            </Link>
-          </Center>
-        </CardBody>
-      </Card>
-    </Container>
+    <div className="mt-12 mx-auto w-full max-w-xs">
+      <h1 className="text-4xl font-bold tracking-tight">Log In</h1>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-8">
+        <TextInput
+          {...register('pennkey')}
+          errorMessage={errors.pennkey?.message}
+          placeholder="janedoe"
+          label="PennKey"
+        />
+        <TextInput
+          {...register('password')}
+          errorMessage={errors.password?.message}
+          type="password"
+          placeholder="••••••••"
+          label="Password"
+        />
+        <button
+          type="submit"
+          className="btn btn-primary w-full"
+          disabled={isSubmitting}
+        >
+          Submit
+        </button>
+      </form>
+      <Link to={'/auth/signup'} className="link block mt-8 text-center w-full">
+        Don&apos;t have an account? Sign up here.
+      </Link>
+    </div>
   );
 }
