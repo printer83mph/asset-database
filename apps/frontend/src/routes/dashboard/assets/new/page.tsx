@@ -18,7 +18,10 @@ export default function NewAssetPage() {
     const id = toast.loading('Creating asset...');
     await triggerCreate(
       {
-        asset,
+        asset: {
+          ...asset,
+          keywords: asset.keywords.map(({ keyword }) => keyword),
+        },
         initialVersion: hasInitialVersion
           ? {
               ...initialVersion,

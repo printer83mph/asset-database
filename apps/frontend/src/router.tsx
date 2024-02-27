@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 
-import AssetsPage from './routes/dashboard/assets/assets';
+import AssetsPage from './routes/dashboard/assets/page';
 import NewAssetPage from './routes/dashboard/assets/new/page';
 import DashboardLayout from './routes/dashboard/layout';
 import DashboardPage from './routes/dashboard/page';

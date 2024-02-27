@@ -7,6 +7,7 @@ import z from 'zod';
 import TextInput from '../../components/input/text-input';
 import { trpc } from '../../utils/trpc';
 import Label from '../../components/input/label';
+import toast from 'react-hot-toast';
 
 const signupSchema = userSchema;
 type FormValues = z.infer<typeof signupSchema>;
@@ -27,10 +28,27 @@ export default function SignupPage() {
   });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    await signup(data);
-    await login({ pennkey: data.pennkey, password: data.password });
-    mutateMe({ pennkey: data.pennkey, school: data.school });
-    navigate('/dashboard');
+    await signup(data, {
+      async onSuccess() {
+        await login(
+          { pennkey: data.pennkey, password: data.password },
+          {
+            onSuccess() {
+              mutateMe({ pennkey: data.pennkey, school: data.school });
+              navigate('/dashboard');
+            },
+            onError(err) {
+              if (err.data?.httpStatus === 400) toast.error(`${err.message}.`);
+              else toast.error('An unknown error occurred.');
+            },
+          },
+        );
+      },
+      onError(err) {
+        if (err.data?.httpStatus === 400) toast.error(`${err.message}.`);
+        else toast.error('An unknown error occurred.');
+      },
+    });
   };
 
   return (

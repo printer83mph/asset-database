@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 export default function DashboardLayout() {
   const { error: meError, data: me } = trpc.auth.me.useSWR();
   const { trigger: triggerLogout } = trpc.auth.logout.useSWRMutation();
+  const { mutate: mutateMe } = trpc.auth.me.useSWR();
 
   const navigate = useNavigate();
 
@@ -41,7 +42,13 @@ export default function DashboardLayout() {
                 Logged in as <strong>{me?.pennkey}</strong>
               </li>
               <li>
-                <button type="button" onClick={() => triggerLogout()}>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await triggerLogout();
+                    mutateMe();
+                  }}
+                >
                   Logout
                 </button>
               </li>
