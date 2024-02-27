@@ -5,6 +5,8 @@ const PATH_SEGMENTS = 3;
 export const USER_SCHOOLS = ['cas', 'seas', 'wharton', 'none'] as const;
 export type UserSchool = (typeof USER_SCHOOLS)[number];
 
+export const DEFAULT_SEMVER = '1.0.0';
+
 export const semverSchema = z
   .string()
   .regex(/^[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}$/, 'Must use shape x.x.x');

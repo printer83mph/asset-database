@@ -1,7 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { HiXMark } from 'react-icons/hi2';
-import { assetSchema, versionSchema } from 'validation/src/main';
+import {
+  assetSchema,
+  versionSchema,
+  DEFAULT_SEMVER,
+} from 'validation/src/main';
 import { z } from 'zod';
 
 import { useState } from 'react';
@@ -9,17 +13,20 @@ import Label from '../input/label';
 import TextArea from '../input/text-area';
 import TextInput from '../input/text-input';
 import Toggle from '../input/toggle';
+import ErrorMessage from '../input/error-message';
 
 const newAssetSchema = z.object({
   asset: assetSchema.extend({
     keywords: z.array(z.object({ keyword: z.string().min(1) })),
   }),
-  hasInitialVersion: z.boolean(),
-  initialVersion: versionSchema.omit({
-    assetPath: true,
-    author: true,
-    changes: true,
-  }),
+  initialVersion: versionSchema
+    .pick({
+      semver: true,
+    })
+    .extend({
+      fileContents: z.string().min(1, 'Please provide an asset file'),
+    })
+    .optional(),
 });
 
 type NewAssetFormData = z.infer<typeof newAssetSchema>;
@@ -28,8 +35,7 @@ export type NewAssetFormSubmitHandler = SubmitHandler<NewAssetFormData>;
 const createDefaultValues = () =>
   ({
     asset: { displayName: '', keywords: [], path: '', description: '' },
-    hasInitialVersion: true,
-    initialVersion: { semver: '0.1.0' },
+    initialVersion: { semver: DEFAULT_SEMVER, fileContents: '' },
   }) satisfies NewAssetFormData;
 
 export function NewAssetForm({
@@ -44,13 +50,14 @@ export function NewAssetForm({
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
     watch,
   } = useForm<NewAssetFormData>({
     defaultValues: createDefaultValues(),
     resolver: zodResolver(newAssetSchema),
   });
 
-  const hasInitialVersion = watch('hasInitialVersion');
+  const initialVersionWatch = watch('initialVersion');
 
   const {
     fields: keywords,
@@ -136,18 +143,55 @@ export function NewAssetForm({
       </div>
       <div className="mt-6">
         <Toggle
-          {...register('hasInitialVersion')}
+          onChange={() => {
+            setValue(
+              'initialVersion',
+              initialVersionWatch
+                ? undefined
+                : { fileContents: '', semver: DEFAULT_SEMVER },
+            );
+          }}
+          checked={!!initialVersionWatch}
           label="Has initial version?"
         />
       </div>
-      {hasInitialVersion && (
-        <div className="pt-6">
+      {!!initialVersionWatch && (
+        <div className="pt-6 space-y-6">
           <TextInput
             {...register('initialVersion.semver')}
             label="Semantic Version"
             errorMessage={errors['initialVersion']?.semver?.message}
             placeholder="0.1.0"
           />
+          {/* it works don't worry LOL */}
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+          <label className="block">
+            <Label label="Asset File" />
+            <input
+              onChange={async (evt) => {
+                if (evt.target.files === null || evt.target.files.length === 0)
+                  return;
+                const base64 = await new Promise<string>((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    resolve(reader.result as string);
+                  };
+                  reader.onerror = (err) => {
+                    reject(err);
+                  };
+                  reader.readAsText(evt.target.files![0]);
+                });
+                setValue('initialVersion.fileContents', base64, {
+                  shouldValidate: true,
+                });
+              }}
+              type="file"
+              className="file-input file-input-bordered w-full max-w-xs"
+            />
+            <ErrorMessage
+              errorMessage={errors.initialVersion?.fileContents?.message}
+            />
+          </label>
         </div>
       )}
       <button type="submit" className="btn btn-primary w-full max-w-xs mt-6">

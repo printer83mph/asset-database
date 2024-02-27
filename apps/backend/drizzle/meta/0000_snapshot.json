@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "65f616dc-0831-4996-b7c1-c1ac73740ba8",
+  "id": "ee823fe3-af11-4c48-a815-22fd094c78f4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "asset": {
@@ -97,6 +97,13 @@
         },
         "semver": {
           "name": "semver",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reference": {
+          "name": "reference",
           "type": "text",
           "primaryKey": false,
           "notNull": true,

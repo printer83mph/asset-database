@@ -1,5 +1,9 @@
 import { TRPCError } from '@trpc/server';
 import { eq } from 'drizzle-orm';
+import crypto from 'node:crypto';
+import { writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { assetSchema, pathSchema, versionSchema } from 'validation';
 import { z } from 'zod';
 
@@ -13,7 +17,8 @@ const assetRouter = router({
       z.object({
         asset: assetSchema,
         initialVersion: versionSchema
-          .omit({ assetPath: true, author: true })
+          .pick({ semver: true })
+          .extend({ fileContents: z.string().min(1) })
           .optional(),
       }),
     )
@@ -43,9 +48,19 @@ const assetRouter = router({
 
       // upload initial version
       if (initialVersion) {
-        await ctx.db
-          .insert(version)
-          .values({ assetPath, author: ctx.user.pennkey, ...initialVersion });
+        // TODO: upload to S3
+        // for now we just save to disk
+        const fileBuffer = Buffer.from(initialVersion.fileContents, 'base64');
+        const fileId = crypto.randomUUID();
+        await writeFile(path.join(tmpdir(), `${fileId}.asset`), fileBuffer);
+
+        await ctx.db.insert(version).values({
+          assetPath,
+          author: ctx.user.pennkey,
+          changes: 'Initial version',
+          reference: fileId,
+          ...initialVersion,
+        });
 
         // return success with path and version
         return { path: assetPath, semver: initialVersion.semver };
@@ -92,7 +107,7 @@ const assetRouter = router({
     const rows = await ctx.db.select().from(asset);
     return rows.map(({ keywords, ...asset }) => ({
       ...asset,
-      keywords: keywords?.split(','),
+      keywords: (keywords || undefined)?.split(','),
     }));
   }),
 });

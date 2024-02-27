@@ -39,6 +39,7 @@ export const assetSchema = z.object({
 export const versionSchema = z.object({
   assetPath: pathSchema,
   semver: semverSchema,
+  reference: z.string().min(1, 'Cannot be empty'),
   author: z.string().min(1, 'Cannot be empty'),
   changes: z.string(),
 });
