@@ -90,8 +90,12 @@ const assetRouter = router({
           message: `Could not find an asset matching path ${path}`,
         });
 
+      const assetData = rows[0].asset;
       return {
-        asset: rows[0].asset,
+        asset: {
+          ...assetData,
+          keywords: (assetData.keywords || undefined)?.split(','),
+        },
         versions: (
           rows
             .map(({ version }) => version)

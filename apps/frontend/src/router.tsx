@@ -8,6 +8,7 @@ import RootLayout from './routes/root';
 import LoginPage from './routes/auth/login';
 import SignupPage from './routes/auth/signup';
 import HomePage from './routes/page';
+import AssetViewPage from './routes/dashboard/assets/[path]/page';
 
 const router = createBrowserRouter([
   {
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
             children: [
               { path: '', element: <AssetsPage /> },
               { path: 'new', element: <NewAssetPage /> },
+              { path: ':path', element: <AssetViewPage /> },
             ],
           },
         ],
