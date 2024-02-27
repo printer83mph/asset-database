@@ -16,12 +16,6 @@ export default function AssetViewPage() {
     semver: versionDL,
   });
 
-  useEffect(() => {
-    // TODO: actually download file
-    // eslint-disable-next-line no-console
-    console.log('file data:', fileData);
-  }, [fileData]);
-
   if (!pathSchema.safeParse(path).success) {
     // TODO
     return <div>Invalid path.</div>;
@@ -66,6 +60,7 @@ export default function AssetViewPage() {
         </ul>
         <div className="divider" />
         <div className="space-y-6">
+          {fileData && <img src={`${fileData.fileContents}`} alt="Preview" />}
           {description && <p>{description}</p>}
           <div>
             <h3 className="text-xl font-semibold">Versions</h3>
@@ -94,7 +89,7 @@ export default function AssetViewPage() {
                         }}
                       >
                         <HiArrowDownTray />
-                        Download
+                        Download/Preview
                       </button>
                     </td>
                   </tr>

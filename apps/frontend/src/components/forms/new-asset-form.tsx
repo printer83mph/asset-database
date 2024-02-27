@@ -179,7 +179,7 @@ export function NewAssetForm({
                   reader.onerror = (err) => {
                     reject(err);
                   };
-                  reader.readAsText(evt.target.files![0]);
+                  reader.readAsDataURL(evt.target.files![0]);
                 });
                 setValue('initialVersion.fileContents', base64, {
                   shouldValidate: true,
