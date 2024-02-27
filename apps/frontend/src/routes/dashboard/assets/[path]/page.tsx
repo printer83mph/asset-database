@@ -1,13 +1,26 @@
 import { Link, useParams } from 'react-router-dom';
 import { pathSchema } from 'validation/src/semantics';
 import { trpc } from '../../../../utils/trpc';
-import { HiArrowLeft } from 'react-icons/hi2';
+import { HiArrowDownTray, HiArrowLeft } from 'react-icons/hi2';
+import { useEffect, useState } from 'react';
 
 export default function AssetViewPage() {
   const { path } = useParams<{ path: string }>();
   const { data, error, isLoading } = trpc.asset.get.useSWR({
     path: path || '',
   });
+
+  const [versionDL, setVersionDL] = useState('');
+  const { data: fileData } = trpc.version.getFile.useSWR({
+    assetPath: path || '',
+    semver: versionDL,
+  });
+
+  useEffect(() => {
+    // TODO: actually download file
+    // eslint-disable-next-line no-console
+    console.log('file data:', fileData);
+  }, [fileData]);
 
   if (!pathSchema.safeParse(path).success) {
     // TODO
@@ -72,6 +85,18 @@ export default function AssetViewPage() {
                     <td>{changes}</td>
                     <td>{author}</td>
                     <td>{reference}</td>
+                    <td>
+                      <button
+                        type="button"
+                        className="ml-auto btn btn-outline flex items-center gap-2"
+                        onClick={() => {
+                          setVersionDL(semver);
+                        }}
+                      >
+                        <HiArrowDownTray />
+                        Download
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
