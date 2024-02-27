@@ -27,6 +27,7 @@ declare global {
 const authRouter = router({
   me: authedProcedure
     .meta({ openapi: { method: 'GET', path: '/auth' } })
+    .output(z.any() as z.ZodSchema<Express.User>)
     .query(({ ctx }) => {
       return ctx.user;
     }),

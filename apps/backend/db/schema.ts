@@ -20,6 +20,7 @@ export const asset = sqliteTable('asset', {
   path: text('path').primaryKey(),
   displayName: text('display_name').notNull(),
   description: text('description'),
+  keywords: text('keywords'),
 });
 
 export const assetRelations = relations(asset, ({ many }) => ({
@@ -37,7 +38,6 @@ export const version = sqliteTable(
       .references(() => user.pennkey)
       .notNull(),
     changes: text('changes').notNull(),
-    keywords: text('keywords'),
   },
   (table) => ({
     pk: primaryKey({

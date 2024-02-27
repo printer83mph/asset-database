@@ -28,17 +28,17 @@ export const assetSchema = z.object({
     )
     .trim(),
   description: z.string().nullish(),
-});
-
-export const versionSchema = z.object({
-  assetPath: pathSchema,
-  semver: semverSchema,
-  author: z.string().min(1, 'Cannot be empty'),
   keywords: z
     .array(z.string())
     .or(z.undefined())
     .transform((keywords) =>
       keywords?.map((keyword) => keyword.trim()).join(','),
     ),
+});
+
+export const versionSchema = z.object({
+  assetPath: pathSchema,
+  semver: semverSchema,
+  author: z.string().min(1, 'Cannot be empty'),
   changes: z.string(),
 });

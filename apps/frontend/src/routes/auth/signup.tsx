@@ -1,25 +1,12 @@
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Center,
-  Container,
-  FormControl,
-  FormLabel,
-  Heading,
-  Link,
-  Select,
-  Stack,
-} from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { UserSchool, userSchema } from 'validation/src/main';
+import { Link, useNavigate } from 'react-router-dom';
+import { userSchema } from 'validation/src/main';
 import z from 'zod';
 
-import ControlledTextInput from '../../components/form/controlled-text-input';
+import TextInput from '../../components/input/text-input';
 import { trpc } from '../../utils/trpc';
+import Label from '../../components/input/label';
 
 const signupSchema = userSchema;
 type FormValues = z.infer<typeof signupSchema>;
@@ -27,89 +14,70 @@ type FormValues = z.infer<typeof signupSchema>;
 export default function SignupPage() {
   const { trigger: signup } = trpc.auth.signup.useSWRMutation();
   const { trigger: login } = trpc.auth.login.useSWRMutation();
-  const { mutate: mutateMe } = trpc.auth.me.useSWR<{
-    pennkey: string;
-    school: UserSchool;
-  }>();
+  const { mutate: mutateMe } = trpc.auth.me.useSWR();
   const navigate = useNavigate();
 
   const {
     register,
-    control,
     handleSubmit,
     formState: { isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { pennkey: '', password: '', name: '', school: 'seas' },
+    defaultValues: { pennkey: '', password: '' },
   });
 
-  const onSubmit: SubmitHandler<FormValues> = async (formData) => {
-    await signup(formData);
-    await login({ pennkey: formData.pennkey, password: formData.password });
-    mutateMe({ pennkey: formData.pennkey, school: formData.school });
-    navigate('/');
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    await signup(data);
+    await login({ pennkey: data.pennkey, password: data.password });
+    mutateMe({ pennkey: data.pennkey, school: data.school });
+    navigate('/dashboard');
   };
 
   return (
-    <Container mt={40}>
-      <Card>
-        <CardHeader>
-          <Heading>Sign Up</Heading>
-        </CardHeader>
-        <CardBody as="form" onSubmit={handleSubmit(onSubmit)} pt={0}>
-          <Stack gap={4}>
-            <ControlledTextInput
-              control={control}
-              path="pennkey"
-              placeholder="janedoe"
-              label="PennKey"
-            />
-            <ControlledTextInput
-              control={control}
-              path="password"
-              type="password"
-              placeholder="••••••••"
-              label="Password"
-            />
-            <ControlledTextInput
-              control={control}
-              path="name"
-              placeholder="Jane Doe"
-              label="Name"
-            />
-            <FormControl>
-              <FormLabel
-                htmlFor="school-select"
-                textColor="gray"
-                fontSize="small"
-                mb={1}
-              >
-                School
-              </FormLabel>
-              <Select id="school-select" {...register('school')}>
-                <option value="none">None</option>
-                <option value="cas">CAS</option>
-                <option value="seas">SEAS</option>
-                <option value="wharton">Wharton</option>
-              </Select>
-            </FormControl>
-          </Stack>
-          <Button
-            type="submit"
-            colorScheme="blue"
-            isLoading={isSubmitting}
-            mt={8}
-            width={'full'}
-          >
-            Submit
-          </Button>
-          <Center mt={4}>
-            <Link as={RouterLink} to={'/auth/login'} textDecor="underline">
-              Already have an account? Log in here.
-            </Link>
-          </Center>
-        </CardBody>
-      </Card>
-    </Container>
+    <div className="mt-12 mx-auto w-full max-w-xs">
+      <h1 className="text-4xl font-bold tracking-tight">Sign Up</h1>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="space-y-6 mt-8">
+          <TextInput
+            {...register('pennkey')}
+            placeholder="janedoe"
+            label="PennKey"
+          />
+          <TextInput
+            {...register('password')}
+            type="password"
+            placeholder="••••••••"
+            label="Password"
+          />
+          <TextInput
+            {...register('name')}
+            placeholder="Jane Doe"
+            label="Name"
+          />
+          <label className="block">
+            <Label label="School" />
+            <select
+              {...register('school')}
+              className="select select-bordered w-full max-w-xs"
+            >
+              <option value="none">None</option>
+              <option value="cas">CAS</option>
+              <option value="seas">SEAS</option>
+              <option value="wharton">Wharton</option>
+            </select>
+          </label>
+        </div>
+        <button
+          type="submit"
+          className="btn btn-primary w-full mt-8"
+          disabled={isSubmitting}
+        >
+          Submit
+        </button>
+      </form>
+      <Link to={'/auth/login'} className="link block mt-8 text-center w-full">
+        Already have an account? Log in here.
+      </Link>
+    </div>
   );
 }
