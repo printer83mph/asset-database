@@ -39,7 +39,7 @@ export default function AssetList() {
                   <li className="badge bg-base-200" key={keyword}>
                     {keyword}
                   </li>
-                ))}
+                )) || <span className="text-base-content/50">None</span>}
               </ul>
             </td>
             <td>

@@ -34,6 +34,7 @@ export const version = sqliteTable(
       .references(() => asset.path)
       .notNull(),
     semver: text('semver').notNull(),
+    reference: text('reference').notNull(),
     author: text('author')
       .references(() => user.pennkey)
       .notNull(),

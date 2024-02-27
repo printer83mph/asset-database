@@ -16,6 +16,7 @@ CREATE TABLE `user` (
 CREATE TABLE `version` (
 	`asset_path` text NOT NULL,
 	`semver` text NOT NULL,
+	`reference` text NOT NULL,
 	`author` text NOT NULL,
 	`changes` text NOT NULL,
 	PRIMARY KEY(`asset_path`, `semver`),

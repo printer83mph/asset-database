@@ -12,7 +12,6 @@ export default function NewAssetPage() {
 
   const onSubmit: NewAssetFormSubmitHandler = async ({
     asset,
-    hasInitialVersion,
     initialVersion,
   }) => {
     const id = toast.loading('Creating asset...');
@@ -22,13 +21,7 @@ export default function NewAssetPage() {
           ...asset,
           keywords: asset.keywords.map(({ keyword }) => keyword),
         },
-        initialVersion: hasInitialVersion
-          ? {
-              ...initialVersion,
-              changes: 'Initial version',
-              semver: '0.1.0',
-            }
-          : undefined,
+        initialVersion,
       },
       {
         onSuccess() {
@@ -50,7 +43,7 @@ export default function NewAssetPage() {
     <div className="flex flex-col items-center">
       <article className="w-full max-w-xs">
         <h1 className="text-3xl font-bold tracking-tight">Create New Asset</h1>
-        <NewAssetForm className="mt-6" onSubmit={onSubmit} />
+        <NewAssetForm className="mt-6 mb-24" onSubmit={onSubmit} />
       </article>
     </div>
   );
