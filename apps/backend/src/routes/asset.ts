@@ -49,7 +49,7 @@ const assetRouter = router({
       // upload initial version
       if (initialVersion) {
         // TODO: upload to S3
-        // for now we just save to disk
+        // for now we just save to disk in base64 format
         const fileBuffer = Buffer.from(initialVersion.fileContents, 'base64');
         const fileId = crypto.randomUUID();
         await writeFile(path.join(tmpdir(), `${fileId}.asset`), fileBuffer);
